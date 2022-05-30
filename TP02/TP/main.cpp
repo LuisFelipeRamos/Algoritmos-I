@@ -14,42 +14,33 @@ void print(std::vector<std::vector<int>> graph, int rows, int cols){
 
 typedef std::pair<int, int> iPair;
 
-int djkistra(std::list<std::pair<int, int>> graph[], int s, int numberOfNodes){
+int widestPath(std::list<std::pair<int, int>> graph[], int s, int t, int numberOfNodes){
     s = s - 1;
-    std::vector<int> parents(numberOfNodes, -1);
-    std::vector<int> processed(numberOfNodes, 0);
-    processed.at(s) = 1;
+    t = t - 1;
 
     std::vector<int> widest(numberOfNodes, INT_MIN);
     widest.at(s) = INT_MAX;
 
-
-    std::priority_queue<iPair, std::vector<iPair>, std::greater<iPair>> pq;
-    pq.push({0, s});
+    std::priority_queue<int, std::vector<int>, std::greater<int>> pq;
+    pq.push(s);
 
     while (!pq.empty()){
-        int u = pq.top().second;
+        int currSrcVertex = pq.top();
         pq.pop();
 
-        for (auto e : graph[u]){
-            int v = e.first;
-            int weight = e.second;
-            int distance = std::max(widest[v], std::min(widest[u], weight));
+        for (auto vertexWeightPair : graph[currSrcVertex]){
+            int currDestVertex = vertexWeightPair.first;
+            int currWeight = vertexWeightPair.second;
+            int distance = std::max(widest[currDestVertex], std::min(widest[currSrcVertex], currWeight));
 
-            if (distance > widest[v]){
-                widest[v] = distance;
-                parents[v] = u;
-                pq.push({distance, v});
+            if (distance > widest[currDestVertex]){
+                widest[currDestVertex] = distance;
+                pq.push(currDestVertex);
             }
-
         }
-
-    }
-    for (int i = 0; i < numberOfNodes; i++){
-        std::cout << i << " : " << widest[i] << std::endl;
     }
 
-    return 0;
+    return widest[t];
 }
 
 int main(int argc, char* argv[]){
@@ -68,8 +59,12 @@ int main(int argc, char* argv[]){
         graph[uCity - 1].push_back({vCity - 1, weight});
     }
 
+    int s, t;
+    for (int i = 0; i < numberOfConsults; i++){
+        std::cin >> s >> t;
+        std::cout << widestPath(graph, s, t, numberOfHighways) << std::endl;
+    }
 
-    int k = djkistra(graph, 4, numberOfHighways);
 
     
     return 0;
