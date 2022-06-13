@@ -5,62 +5,66 @@
 utilizada como função de comparação da estrutura da fila de prioridades(priority queue) da biblioteca padrão. */
 struct Compare{
 
-    public:
-
     /* Descrição: função de comparação entre dois pares de inteiros, que compara o segundo valor de ambos os pares.
     Entrada: dois pares de inteiros.
     Saída: verdadeiro se o valor do primeiro par for maior, falso caso contrário. */
-    bool operator()(std::pair<int, int>& p1, std::pair<int, int>& p2){
+    bool operator()(const std::pair<int, int>& p1, const std::pair<int, int>& p2){
         return p1.second < p2.second;
     }
 };
 
 
-/* Descrição: Função para o cálculo do caminho de gargalo máximo entre dois vértices em um grafo
-Entrada:
-Saída: */
-int widestPathAlgorithm(std::vector<std::list<std::pair<int, int>>>& graph, int s, int t){
-    s = s - 1;
-    t = t - 1;
+/* Descrição: Função para o cálculo do caminho de gargalo máximo partindo de um vértice específico para todos os outros em um grafo.
+Entrada: referência para o grafo representado em sua forma de lista de adjacências, ou seja, um vector que contêm listas de pares, e um inteiro que
+representa o identificador do vértice de origem.
+Saída: vetor que contêm o valor do gargalo máximo de caminho entre o vértice desejado e o resto do grafo. */
+std::vector<int> widestPathAlgorithm(std::vector<std::list<std::pair<int, int>>>& graph, int& src){
 
     int numberOfNodes = graph.size();
 
-    std::vector<int> widest(numberOfNodes, INT_MIN);
-    widest.at(s) = INT_MAX;
+    /* Vetor auxiliar para armazenar o valor dos gargalos máximos, inicialmente com os valores mínimos permitidos para um inteiro. */
+    std::vector<int> widestPathVector(numberOfNodes, INT_MIN);
+    widestPathVector.at(src) = INT_MAX;
 
+    /* Vetor auxiliar para armazenar quais vértices do grafo já foram visitados. */
     std::vector<bool> visited(numberOfNodes, 0);
 
+    /* Fila de prioridades utilizada para organizar os vértices e os gargalos de seus caminhos conhecidos até o momento
+    na forma desejada. */
     std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, Compare> pq;
-    pq.push({s, INT_MAX});
+    pq.push({src, INT_MAX});
 
     while (!pq.empty()){
+
         int currVertex = pq.top().first;
-        int currWidestValue = pq.top().second;
+        int currVertexWidestPath = pq.top().second;
         pq.pop();
 
         if (visited.at(currVertex)) continue;
         
         visited.at(currVertex) = 1;
-        widest.at(currVertex) = currWidestValue;
+        widestPathVector.at(currVertex) = currVertexWidestPath;
         
 
-        for (auto vertexWeightPair : graph[currVertex]){
+        for (auto vertexWeightPair : graph.at(currVertex)){
             
-            int currNewVertex = vertexWeightPair.first;
+            int currAdjVertex = vertexWeightPair.first;
 
-            if (visited.at(currNewVertex)) continue;
+            if (visited.at(currAdjVertex)) continue;
 
-            int currNewWeight = vertexWeightPair.second;
+            int currAdjWeight = vertexWeightPair.second;
             
-            int widestValue = std::min(widest.at(currVertex), currNewWeight);
+            int currAdjVertexWidestPath = std::min(widestPathVector.at(currVertex), currAdjWeight);
 
-            pq.push({currNewVertex, widestValue});
+            pq.push({currAdjVertex, currAdjVertexWidestPath});
             
         }
 
     }
 
-    return widest[t];
+    widestPathVector.at(src) = 0;
+
+    return widestPathVector;
 }
 
 
@@ -83,12 +87,22 @@ int main(int argc, char* argv[]){
 
     int src, dest;
 
+    std::vector<std::vector<int>> widestPathVectorForEachOrigin(numberOfCities, std::vector<int>());
+
     for (int i = 0; i < numberOfConsults; i++){
         std::cin >> src >> dest;
-        std::cout << widestPathAlgorithm(graph, src, dest) << std::endl; 
+
+        src = src - 1;
+        dest = dest - 1;
+
+        if (widestPathVectorForEachOrigin.at(src).empty()){
+            widestPathVectorForEachOrigin.at(src) =  widestPathAlgorithm(graph, src);
+        }
+
+        int widestPathValue = widestPathVectorForEachOrigin.at(src).at(dest);
+
+        std::cout << widestPathValue << std::endl;
     }
 
-
-    
     return 0;
 }
