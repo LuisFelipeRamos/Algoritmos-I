@@ -34,28 +34,34 @@ std::vector<int> widestPathAlgorithm(std::vector<std::list<std::pair<int, int>>>
     std::priority_queue<std::pair<int, int>, std::vector<std::pair<int, int>>, Compare> pq;
     pq.push({src, INT_MAX});
 
+    /* Enquanto a fila de prioridades não estiver vazia, existem valores que ainda não foram checados. */
     while (!pq.empty()){
-
+        
+        /* Pega valores do elemento do topo da lista e exclui esse elemento. */
         int currVertex = pq.top().first;
         int currVertexWidestPath = pq.top().second;
         pq.pop();
 
+        /* Se o vértice já foi visitado, é ignorado. */
         if (visited.at(currVertex)) continue;
         
         visited.at(currVertex) = 1;
         widestPathVector.at(currVertex) = currVertexWidestPath;
         
-
+        /* Para cada vizinho do vértice, checamos. */
         for (auto vertexWeightPair : graph.at(currVertex)){
             
-            int currAdjVertex = vertexWeightPair.first;
+            int currAdjVertex = vertexWeightPair.first; 
 
+            /* Se o vértice já foi visitado, é ignorado. */
             if (visited.at(currAdjVertex)) continue;
 
             int currAdjWeight = vertexWeightPair.second;
             
+            /* O valor do gargalo analisado para o vértice é o mínimo entre o gargalo do vértice ascendente e o peso do caminho entre eles. */
             int currAdjVertexWidestPath = std::min(widestPathVector.at(currVertex), currAdjWeight);
 
+            /* Novo elemento é adicionado na fila de prioridades. */
             pq.push({currAdjVertex, currAdjVertexWidestPath});
             
         }
@@ -74,12 +80,14 @@ int main(int argc, char* argv[]){
     int numberOfHighways;
     int numberOfConsults;
 
+    /* Leitura do número de cidades, rodovias e consultas. */
     std::cin >> numberOfCities >> numberOfHighways >> numberOfConsults;
    
     std::vector<std::list<std::pair<int, int>>> graph(numberOfCities);
 
     int uCity, vCity, weight;
-  
+    
+    /* Leitura dos vértices e arestas do grafo que representa a malha rodoviária. */
     for (int i = 0; i < numberOfHighways; i++){
         std::cin >> uCity >> vCity >> weight;
         graph[uCity - 1].push_back({vCity - 1, weight});
@@ -88,7 +96,8 @@ int main(int argc, char* argv[]){
     int src, dest;
 
     std::vector<std::vector<int>> widestPathVectorForEachOrigin(numberOfCities, std::vector<int>());
-
+    
+    /* Leitura das consultas e, para cada uma delas, chamada do algoritmo de widestPath, se necessário. */
     for (int i = 0; i < numberOfConsults; i++){
         std::cin >> src >> dest;
 
