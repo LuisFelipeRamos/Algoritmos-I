@@ -2,28 +2,61 @@
 
 #include <bits/stdc++.h>
 
-int maxHistogramArea(std::vector<int>& histogram, int left, int right){
-    if (left > right) return INT_MIN;
-    if (left == right) return histogram.at(left);
-    
-    int min = histogram.at(left);;
-    int minIndex = left;
 
-    for (std::size_t i = left + 1; i < right; i++){
-        if (histogram.at(i) < min){
-            min = histogram.at(i);
-            minIndex = i;
+bool tableFitsHistogram(std::vector<int>& histogram, int tableLength, int tableWidth){
+
+    std::size_t numberOfBars = histogram.size();
+
+    std::stack<int> histogramIndexes;
+
+    int i = 0;
+
+    while (i < numberOfBars){
+
+        if (histogramIndexes.empty() || histogram.at(histogramIndexes.top()) <= histogram.at(i)){
+            histogramIndexes.push(i++);
+        }
+
+        else{
+
+            int currSmallestBar = histogramIndexes.top();
+            histogramIndexes.pop();
+
+            int maxLength = histogramIndexes.empty() ? i : i - histogramIndexes.top() - 1;
+            int maxWidth = histogram.at(currSmallestBar);
+
+
+            if ((tableWidth <= maxWidth && tableLength <= maxLength) || (tableWidth <= maxLength && tableLength <= maxWidth)) {
+                return 1;
+            }
         }
     }
-    return std::max({int(min * (right - left)), maxHistogramArea(histogram, left, minIndex - 1), maxHistogramArea(histogram, minIndex + 1, right)});
+
+    while (!histogramIndexes.empty()){
+
+        int currSmallestBar = histogramIndexes.top();
+        histogramIndexes.pop();
+
+        int maxLength = histogramIndexes.empty() ? i : i - histogramIndexes.top() - 1;
+        int maxWidth = histogram.at(currSmallestBar);
+
+        if ((tableWidth <= maxWidth && tableLength <= maxLength) || (tableWidth <= maxLength && tableLength <= maxWidth)) {
+            return 1;
+        }    
+    }
+
+    return 0;
 }
 
-
-bool fitsInHouse(int tableLength, int tableWidth, std::vector<std::vector<int>> houseMatrixHistograms){
-
+bool tableFitsHouse(std::vector<std::vector<int>>& houseMatrixHistograms, int tableLength, int tableWidth){
+    bool tableFitsHouse;
+    for (std::vector<int> histogram : houseMatrixHistograms){
+        if (tableFitsHistogram(histogram, tableLength, tableWidth)){
+            return true;
+        }
+    }
     return false;
-};
-
+}
 
 int main(int argc, char* argv[]){
 
@@ -59,9 +92,6 @@ int main(int argc, char* argv[]){
               
                 houseMatrixHistograms.at(i).at(j) = houseMatrixHistograms.at(i - 1).at(j) + 1;
             }
-
-           
-       
         }
     }
 
@@ -72,26 +102,15 @@ int main(int argc, char* argv[]){
 
     int tableLength, tableWidth;
     int tableArea;
-
+    int maxArea;
 
     for (int i = 0; i < numberOfTables; i++){
         std::cin >> tableLength >> tableWidth;
-        tableArea = tableLength * tableWidth;
+        if (tableFitsHouse(houseMatrixHistograms, tableLength, tableWidth)){
+            tableArea = tableLength * tableWidth;
+            
+        }   
     }
-
-    for (auto a : houseMatrixHistograms){
-        for (auto b: a){
-            std::cout << b;
-        }
-        std::cout << std::endl;
-    }
-
-    std::cout << "-------------------\n";
-
-    for (auto e : houseMatrixHistograms){
-        std::cout << maxHistogramArea(e, 0, e.size() - 1) << std::endl;
-    }
-
 
     return 0;
 }
