@@ -5,7 +5,7 @@
 
 bool tableFitsHistogram(std::vector<int>& histogram, int tableLength, int tableWidth){
 
-    std::size_t numberOfBars = histogram.size();
+    int numberOfBars = int(histogram.size());
 
     std::stack<int> histogramIndexes;
 
@@ -49,7 +49,6 @@ bool tableFitsHistogram(std::vector<int>& histogram, int tableLength, int tableW
 }
 
 bool tableFitsHouse(std::vector<std::vector<int>>& houseMatrixHistograms, int tableLength, int tableWidth){
-    bool tableFitsHouse;
     for (std::vector<int> histogram : houseMatrixHistograms){
         if (tableFitsHistogram(histogram, tableLength, tableWidth)){
             return true;
@@ -104,20 +103,22 @@ int main(int argc, char* argv[]){
     std::pair<int, int> maxAreaTableSizes = {INT_MIN, INT_MIN};
     int maxArea = INT_MIN;
 
-    std::vector<std::vector<int>> tablesThatFitHouse(houseLength + 1, std::vector<int>(houseWidth + 1, -1));
+    int maxHouseSide = houseLength > houseWidth ? houseLength : houseWidth;
+
+    std::vector<std::vector<int>> tablesThatFitHouse(maxHouseSide + 1, std::vector<int>(maxHouseSide + 1, 2));
 
     for (int i = 0; i < numberOfTables; i++){
 
         std::cin >> tableLength >> tableWidth;
 
-        if (tableLength > houseLength || tableLength > houseWidth || tableWidth > houseLength || tableWidth > houseWidth) continue;
-
         int tableFits = tablesThatFitHouse.at(tableLength).at(tableLength);
         int tableFitsRotated = tablesThatFitHouse.at(tableWidth).at(tableLength);
 
-        if (tableFits == 0 || tableFitsRotated == 0) continue;
+        if ((tableFits == 0) || (tableFitsRotated == 0)){
+            continue;
+        }
 
-        if (tableFits == 1 || tableFitsRotated == 1){
+        if ((tableFits == 1) || (tableFitsRotated == 1)){
             tableArea = tableLength * tableWidth;
             if (tableArea > maxArea){
                 maxArea = tableArea;
@@ -134,11 +135,10 @@ int main(int argc, char* argv[]){
         }
 
         else if (tableFitsHouse(houseMatrixHistograms, tableLength, tableWidth)){
-
-            for (int m = 0; m < tableLength; m++){
-                for (int n = 0;  n < tableWidth; n++){
-                    tablesThatFitHouse.at(tableLength).at(tableWidth) = 1;
-                    tablesThatFitHouse.at(tableWidth).at(tableLength) = 1;
+            for (int m = 0; m < tableLength + 1; m++){
+                for (int n = 0;  n < tableWidth + 1; n++){
+                    tablesThatFitHouse.at(m).at(n) = 1;
+                    tablesThatFitHouse.at(n).at(m) = 1;
                 }
             }
     
@@ -156,14 +156,22 @@ int main(int argc, char* argv[]){
                 continue;
             }
         }
+
         else{
-            for (int m = tableLength; m < houseLength; m++){
-                for (int n = tableWidth; n < houseWidth; n++){
-                    tablesThatFitHouse.at(tableLength).at(tableWidth) = 0;
-                    tablesThatFitHouse.at(tableWidth).at(tableLength) = 0;
+            for (int m = tableLength; m < maxHouseSide + 1; m++){
+                for (int n = tableWidth; n < maxHouseSide + 1; n++){
+                    tablesThatFitHouse.at(m).at(n) = 0;
+                    tablesThatFitHouse.at(n).at(m) = 0;
                 }
             }
         }        
+    }
+
+    for (int i = 0; i < tablesThatFitHouse.size(); i++){
+        for (int j = 0; j < tablesThatFitHouse.at(i).size(); j++){
+            std::cout << tablesThatFitHouse.at(i).at(j) << " ";
+        }
+        std::cout << "\n";
     }
 
     std::cout << maxAreaTableSizes.first << " " << maxAreaTableSizes.second << std::endl;
