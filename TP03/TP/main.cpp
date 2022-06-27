@@ -27,7 +27,7 @@ bool tableFitsHistogram(std::vector<int>& histogram, int tableLength, int tableW
 
 
             if ((tableWidth <= maxWidth && tableLength <= maxLength) || (tableWidth <= maxLength && tableLength <= maxWidth)) {
-                return 1;
+                return true;
             }
         }
     }
@@ -41,11 +41,11 @@ bool tableFitsHistogram(std::vector<int>& histogram, int tableLength, int tableW
         int maxWidth = histogram.at(currSmallestBar);
 
         if ((tableWidth <= maxWidth && tableLength <= maxLength) || (tableWidth <= maxLength && tableLength <= maxWidth)) {
-            return 1;
+            return true;
         }    
     }
 
-    return 0;
+    return false;
 }
 
 bool tableFitsHouse(std::vector<std::vector<int>>& houseMatrixHistograms, int tableLength, int tableWidth){
@@ -95,22 +95,35 @@ int main(int argc, char* argv[]){
         }
     }
 
-
-
     int numberOfTables;
     std::cin >> numberOfTables;
 
     int tableLength, tableWidth;
     int tableArea;
-    int maxArea;
+
+    std::pair<int, int> maxAreaTableSizes = {INT_MIN, INT_MIN};
+    int maxArea = INT_MIN;
 
     for (int i = 0; i < numberOfTables; i++){
         std::cin >> tableLength >> tableWidth;
         if (tableFitsHouse(houseMatrixHistograms, tableLength, tableWidth)){
             tableArea = tableLength * tableWidth;
-            
-        }   
+            if (tableArea > maxArea){
+                maxArea = tableArea;
+                maxAreaTableSizes = {tableLength, tableWidth};
+            }
+            else if(tableArea == maxArea){
+                if (tableWidth > maxAreaTableSizes.second){
+                    maxAreaTableSizes = {tableLength, tableWidth};
+                }
+            }
+            else{
+                continue;
+            }
+        }        
     }
+
+    std::cout << maxAreaTableSizes.first << " " << maxAreaTableSizes.second << std::endl;
 
     return 0;
 }
