@@ -104,9 +104,20 @@ int main(int argc, char* argv[]){
     std::pair<int, int> maxAreaTableSizes = {INT_MIN, INT_MIN};
     int maxArea = INT_MIN;
 
+    std::vector<std::vector<int>> tablesThatFitHouse(houseLength + 1, std::vector<int>(houseWidth + 1, -1));
+
     for (int i = 0; i < numberOfTables; i++){
+
         std::cin >> tableLength >> tableWidth;
-        if (tableFitsHouse(houseMatrixHistograms, tableLength, tableWidth)){
+
+        if (tableLength > houseLength || tableLength > houseWidth || tableWidth > houseLength || tableWidth > houseWidth) continue;
+
+        int tableFits = tablesThatFitHouse.at(tableLength).at(tableLength);
+        int tableFitsRotated = tablesThatFitHouse.at(tableWidth).at(tableLength);
+
+        if (tableFits == 0 || tableFitsRotated == 0) continue;
+
+        if (tableFits == 1 || tableFitsRotated == 1){
             tableArea = tableLength * tableWidth;
             if (tableArea > maxArea){
                 maxArea = tableArea;
@@ -119,6 +130,38 @@ int main(int argc, char* argv[]){
             }
             else{
                 continue;
+            }
+        }
+
+        else if (tableFitsHouse(houseMatrixHistograms, tableLength, tableWidth)){
+
+            for (int m = 0; m < tableLength; m++){
+                for (int n = 0;  n < tableWidth; n++){
+                    tablesThatFitHouse.at(tableLength).at(tableWidth) = 1;
+                    tablesThatFitHouse.at(tableWidth).at(tableLength) = 1;
+                }
+            }
+    
+            tableArea = tableLength * tableWidth;
+            if (tableArea > maxArea){
+                maxArea = tableArea;
+                maxAreaTableSizes = {tableLength, tableWidth};
+            }
+            else if(tableArea == maxArea){
+                if (tableWidth > maxAreaTableSizes.second){
+                    maxAreaTableSizes = {tableLength, tableWidth};
+                }
+            }
+            else{
+                continue;
+            }
+        }
+        else{
+            for (int m = tableLength; m < houseLength; m++){
+                for (int n = tableWidth; n < houseWidth; n++){
+                    tablesThatFitHouse.at(tableLength).at(tableWidth) = 0;
+                    tablesThatFitHouse.at(tableWidth).at(tableLength) = 0;
+                }
             }
         }        
     }
